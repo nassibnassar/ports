@@ -1,16 +1,13 @@
 PORTNAME=	amberfish
-PORTVERSION=	1.6.4
-PORTREVISION=	3
+PORTVERSION=	1.7.1
 CATEGORIES=	textproc databases
-MASTER_SITES=	SF/${PORTNAME}/Amberfish%20source%20-%20stable/${PORTVERSION}	\
-		http://etymon.com/software/amberfish/stable/
 
-MAINTAINER=	ports@FreeBSD.org
-COMMENT=	General purpose text retrieval Software
-WWW=		https://web.archive.org/web/20100419215307/http://www.etymon.com/tr.html
+MAINTAINER=	nrn@etymon.com
+COMMENT=	Full-text search engine with command-line interface
+WWW=		https://gitlab.com/amberfish/amberfish
 
-LICENSE=	GPLv2
-LICENSE_FILE=	${WRKSRC}/COPYING
+LICENSE=	MIT
+LICENSE_FILE=	${WRKSRC}/LICENSE
 
 LIB_DEPENDS=	libxerces-c.so:textproc/xerces-c3
 
@@ -26,11 +23,8 @@ PORTDOCS=	*
 
 OPTIONS_DEFINE=	DOCS
 
-DOCS_USES=	makeinfo
+DOCS_BUILD_DEPENDS=	asciidoctor:textproc/rubygem-asciidoctor
 DOCS_PLIST_FILES=	share/man/man1/af.1.gz
-
-post-extract:
-	${CP} ${FILESDIR}/porter.cc ${WRKSRC}/src
 
 post-patch:
 	@${REINPLACE_CMD} -e \
@@ -40,15 +34,18 @@ post-patch:
 	@${REINPLACE_CMD} -e \
 		's|-O3 |@CFLAGS@ | ; \
 		s|make strip|| ; \
-		s|cp |$${BSD_INSTALL_PROGRAM} |' ${WRKSRC}/src/Makefile.in
+		s|cp |$${BSD_INSTALL_PROGRAM} |' ${WRKSRC}/src/backend/Makefile.in
 
 post-patch-DOCS-off:
 	@${REINPLACE_CMD} -e \
 		'/cd doc/d' ${WRKSRC}/Makefile
 
+post-configure:
+	echo "#define AF_VERSION \"v${PORTVERSION}\"" > ${WRKSRC}/src/backend/version.h
+	echo v${PORTVERSION} > ${WRKSRC}/doc/version.adoc
+
 post-install-DOCS-on:
 	@${MKDIR} ${STAGEDIR}${DOCSDIR}
-	${INSTALL_DATA} ${WRKSRC}/amberfish.png ${STAGEDIR}${DOCSDIR}
-	${INSTALL_DATA} ${WRKSRC}/doc/html/*.html ${STAGEDIR}${DOCSDIR}
+	${INSTALL_DATA} ${WRKSRC}/doc/amberfish.html ${STAGEDIR}${DOCSDIR}
 
 .include <bsd.port.mk>
