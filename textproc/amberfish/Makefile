@@ -1,6 +1,9 @@
 PORTNAME=	amberfish
-PORTVERSION=	1.7.1
+DISTVERSION=	1.7.1
 CATEGORIES=	textproc databases
+
+USE_GITLAB=	yes
+GL_COMMIT=	d0b6e49d750e2c445a4c6526422d4ff43bc668d7
 
 MAINTAINER=	nrn@etymon.com
 COMMENT=	Full-text search engine with command-line interface
@@ -25,20 +28,6 @@ OPTIONS_DEFINE=	DOCS
 
 DOCS_BUILD_DEPENDS=	asciidoctor:textproc/rubygem-asciidoctor
 DOCS_PLIST_FILES=	share/man/man1/af.1.gz
-
-post-patch:
-	@${REINPLACE_CMD} -e \
-		's|$${MAKEFLAGS} ||' ${WRKSRC}/Makefile
-	@${REINPLACE_CMD} -e \
-		's|cp |$${BSD_INSTALL_MAN} |' ${WRKSRC}/doc/Makefile.in
-	@${REINPLACE_CMD} -e \
-		's|-O3 |@CFLAGS@ | ; \
-		s|make strip|| ; \
-		s|cp |$${BSD_INSTALL_PROGRAM} |' ${WRKSRC}/src/backend/Makefile.in
-
-post-patch-DOCS-off:
-	@${REINPLACE_CMD} -e \
-		'/cd doc/d' ${WRKSRC}/Makefile
 
 post-configure:
 	echo "#define AF_VERSION \"v${PORTVERSION}\"" > ${WRKSRC}/src/backend/version.h
